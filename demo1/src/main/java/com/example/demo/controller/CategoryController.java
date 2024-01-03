@@ -1,23 +1,39 @@
 package com.example.demo.controller;
 
+import com.example.demo.model.dto.response.CategoryResponse;
 import com.example.demo.model.entity.Category;
-import com.example.demo.service.ICategoryService;
+import com.example.demo.service.category.ICategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class CategoryController {
     @Autowired
     private ICategoryService categoryService;
 
-    @GetMapping("/categories")
-    public ResponseEntity<List<Category>> getCategories() {
-        List<Category> categories = categoryService.findAll();
-        return new ResponseEntity<>(categories, HttpStatus.OK);
+//    @GetMapping("/categories")
+//    public ResponseEntity<List<CategoryResponse>> getCategories() {
+//        List<CategoryResponse> categories = categoryService.findAll();
+//        return new ResponseEntity<>(categories, HttpStatus.OK);
+//    }
+
+    @GetMapping("/api/v1/categories")
+    public ResponseEntity<Page<CategoryResponse>> getCategories(
+            @RequestParam(defaultValue = "5",name = "limit") int limit,
+            @RequestParam(defaultValue = "0",name = "page") int currentPage
+            ) {
+        Pageable pageable = PageRequest.of(currentPage, limit);
+        Page<CategoryResponse> categoryPage = categoryService.findAll(pageable);
+        return new ResponseEntity<>(categoryPage,HttpStatus.OK);
     }
 
     @PostMapping("/categories")
@@ -52,5 +68,14 @@ public class CategoryController {
             return new ResponseEntity<>("DELETE SUCCESSFULLY", HttpStatus.OK);
         }
         return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
+    }
+    @GetMapping("/api/v1/cate")
+    public ResponseEntity<?> sortCategory(@RequestParam(defaultValue = "5",name = "limit") int limit,
+                                          @RequestParam(defaultValue = "0",name = "page") int currentPage,
+                                          @RequestParam(defaultValue = "asc",name = "sorts") String sorts,
+                                          @RequestParam(defaultValue = "id",name = "order") String order) {
+        Pageable pageable = PageRequest.of(currentPage, limit);
+        Page<CategoryResponse> categoryPage = categoryService.sortByName(pageable, sorts, order);
+        return new ResponseEntity<>(categoryPage, HttpStatus.OK);
     }
 }

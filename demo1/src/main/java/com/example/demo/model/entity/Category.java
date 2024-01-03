@@ -1,6 +1,10 @@
 package com.example.demo.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+
+import java.util.List;
+import java.util.Set;
 
 @Entity
 public class Category {
@@ -11,8 +15,18 @@ public class Category {
     private String categoryName;
     @Column(columnDefinition = "boolean default true")
     private Boolean status;
-
+    @OneToMany(mappedBy = "category",fetch = FetchType.EAGER)
+    @JsonIgnore
+    private List<Product> products;
     public Category() {
+    }
+
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<Product> products) {
+        this.products = products;
     }
 
     public Category(Long id, String categoryName, Boolean status) {
